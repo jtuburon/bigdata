@@ -65,6 +65,7 @@ def list_teachers(request):
 			teachers=[]
 
 			pattern2= ["Ciencias Bio"]
+			pattern3= ["Mec"]
 
 			for link in teachers_links:
 				if "/index.php/profesores" in link:
@@ -93,13 +94,50 @@ def list_teachers(request):
 							extension= matching.group(0)
 						t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension)
 						teachers.append(t)
+				elif "es/isis-descripcion/profesores" in link:
+					print "PatternISIS"
+					br.follow_link(unique_teachers_url[link]);
+					root = html.fromstring(br.response().read())
+					teachers_e = root.xpath("//div[@class='span8']")
+					print len(teachers_e)	
+					i=0									
+					for t_e in teachers_e:		
+						name=""
+						email=""
+						rangekind=""
+						extension=""
+						
+						print len(t_e)						
+						print "Cargo: " 
+						c= t_e.xpath(".//h4[@class='cargo']")
+						dirty_data = etree.tostring(c[0])	
+						if(i==0):
+							print dirty_data
+							i=1
+						matching =  re.search(re.compile('160;(Profesor(.+))</h4>', re.UNICODE), dirty_data)
+						if matching is not  None:
+							rangekind= matching.group(1)
+
+						name = t_e[0][0].text
+						dirty_data = etree.tostring(t_e[2])						
+						matching =  re.search('160;(\d{4})',dirty_data)
+						if matching is not  None:
+							extension= matching.group(1)
+
+
+						t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension)
+						teachers.append(t)
+
+
 				elif pattern2[0] in d.name:
 					print unique_teachers_url[link];
 					br.follow_link(unique_teachers_url[link]);
-					print br.response().read();
 					root = html.fromstring(br.response().read())
-					teachers_e = root.xpath("//tr[@role='presentation']")
-					print len(teachers_e)										
+					iframe_e = root.xpath("//iframe[contains(@src, 'academia.uniandes.edu.co/WebAcademy/showFaculties')]")[0]
+					br.follow_link(url=iframe_e.get("src"));
+					print br.response().read()
+					root = html.fromstring(br.response().read())
+					teachers_e= root.xpath("//tr")
 					for t_e in teachers_e:		
 						name=""
 						email=""
@@ -117,6 +155,35 @@ def list_teachers(request):
 						#	extension= matching.group(0)
 						t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension)
 						teachers.append(t)
+				elif pattern3[0] in d.name:
+					print unique_teachers_url[link];
+					br.follow_link(unique_teachers_url[link]);
+					root = html.fromstring(br.response().read())
+
+					## PROFESORES DE PLANTA
+					teachers_e = root.xpath("//article/section/p//*[@style='color: #0073a3;']")
+					for t_e in teachers_e:		
+						name=""
+						email=""
+						rangekind="PROFESOR DE PLANTA"
+						extension=""
+
+						#n= t_e.xpath('.//b')
+						#l= t_e.xpath('.//a')
+						if t_e.text != None:
+							name= t_e.text
+	 						print name
+							tables_e= t_e.xpath("./../../following-sibling::table[1]")
+							if(len(tables_e)==0):
+								tables_e= t_e.xpath("./../following-sibling::table[1]")
+							print etree.tostring(tables_e[0])
+							#email=l[len(l)-1].text.replace("\r","").replace("\n","")																	
+							dirty_data = etree.tostring(tables_e[0])
+							matching =  re.search('Ext.*(\d{4})',dirty_data)
+							if matching is not  None:
+								extension= matching.group(1)
+							t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension)
+							teachers.append(t)
 			serializer = TeacherSerializer(teachers, many=True)
 			return JSONResponse(serializer.data)
 
