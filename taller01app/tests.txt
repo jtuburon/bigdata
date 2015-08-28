@@ -1,0 +1,6 @@
+Deparment Tests 
+
+{"name": "Departamento de Antropologia", "url":"http://antropologia.uniandes.edu.co/" }
+{"name": "Departamento de Filosofia","url": "http://filosofia.uniandes.edu.co/"}
+{"name": "Departamento de Lenguajes y Estudios Socioculturales","url": "http://lenguajes.uniandes.edu.co/"}
+{"name": "Departamento de Ciencia Politica","url":"http://c-politica.uniandes.edu.co/"}
