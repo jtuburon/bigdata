@@ -1,0 +1,62 @@
+Mundo
+http://feeds.elespectador.com/c/33813/f/607853/index.rss
+http://www.eltiempo.com/contenido/mundo/rss.xml
+
+Deportes
+http://feeds.elespectador.com/c/33813/f/607859/index.rss
+http://www.eltiempo.com/contenido/deportes/rss.xml
+
+Tecnologia
+http://feeds.elespectador.com/c/33813/f/607872/index.rss
+http://www.eltiempo.com/contenido/tecnosfera/rss.xml
+
+Espectador
+
+-xml
+-rss 
+	-channel
+		title
+		link
+		description
+		language
+		pubDate
+		lastBuildDate
+		ttl
+		item
+			title
+			link
+			description
+			enclosure
+			category 
+			category
+			category
+			pubDate
+			comments
+			guid
+			dc:creator
+
+
+El Tiempo
+
+rss 
+	channel
+		title
+		link
+		description
+		language
+		copyright
+		image
+			title
+			url
+			link
+			width
+			height
+        item
+        	title
+        	id
+        	section
+        	link
+        	pubDate
+        	description
+        	enclosure
+        
