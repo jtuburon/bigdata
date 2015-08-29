@@ -11,6 +11,7 @@ from rest_framework.parsers import JSONParser
 from serializers import DepartmentSerializer, TeacherSerializer
 from models import Department, Teacher
 
+from django.shortcuts import render
 
 from lxml import html, etree
 import re, mechanize
@@ -28,21 +29,30 @@ class JSONResponse(HttpResponse):
 		super(JSONResponse, self).__init__(content, **kwargs)
 
 
+def index(request):
+	departments=get_departments()
+	context = {'departments_list': departments}
+	return render(request, 'taller01app/index.html', context)
+
+def get_departments():
+	departaments_url = 'http://www.uniandes.edu.co/institucional/facultades/listado-de-departamentos'
+	br = mechanize.Browser()
+	br.open(departaments_url)
+	root = html.fromstring(br.response().read())
+	depts = root.xpath('//table[@class="contentpaneopen"][2]//ul/li/a')
+	departments=[]
+	for dept in depts:
+		d = Department(name=dept.text, url=dept.get("href"))
+		departments.append(d)
+	return departments
+
 """
 List all departments
 """
 def list_departments(request):
     
     if request.method == 'GET' or request.method == 'POST':
-		departaments_url = 'http://www.uniandes.edu.co/institucional/facultades/listado-de-departamentos'
-		br = mechanize.Browser()
-		br.open(departaments_url)
-		root = html.fromstring(br.response().read())
-		depts = root.xpath('//table[@class="contentpaneopen"][2]//ul/li/a')
-		departments=[]
-		for dept in depts:
-			d = Department(name=dept.text, url=dept.get("href"))
-			departments.append(d)
+		departments=get_departments()
 		serializer = DepartmentSerializer(departments, many=True)
 		return JSONResponse(serializer.data)
 
