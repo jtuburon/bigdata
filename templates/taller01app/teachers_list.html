@@ -1,6 +1,6 @@
 <div class="panel panel-default">
     <div class="panel-heading">
-        <i class="fa fa-bar-chart-o fa-fw"></i> Profesores de Departamento de Ing de Sistemas
+        <i class="fa fa-bar-chart-o fa-fw"></i> Profesores de {{department.name}}
     </div>
     <!-- /.panel-heading -->
     <div class="panel-body">
@@ -19,16 +19,17 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                        
+                         {% for t in teachers_list %}
+                             <tr>
+                                <td></td>
+                                <td>{{t.name}}</td>
+                                <td>{{t.rangekind}}</td>
+                                <td>{{t.dependency}}</td>
+                                <td>{{t.extension}}</td>
+                                <td>{{t.email}}</td>
+                                <td>{{t.webpage}}</td>
+                            </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
