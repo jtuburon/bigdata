@@ -4,7 +4,7 @@ function view_teachers(name, url){
 	console.log(json)
 
 	$.ajax({
-        url: "teachers/",
+        url: "teachers/list",
         data: {
             department: json
         },
