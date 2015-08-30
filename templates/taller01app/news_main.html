@@ -1,0 +1,71 @@
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Consultas de Noticias sobre fuentes RSS</h1>
+    </div>
+</div>
+
+<!-- /.row -->
+<div class="row">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <i class="fa fa-bell fa-fw"></i> Opciones de Filtrado
+        </div>
+        <!-- /.panel-heading -->
+        <div class="panel-body">
+            <nav class="navbar navbar-default">
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-2">
+                  <form class="navbar-form navbar-left" role="search">
+                    <div class="form-group">
+                    <div class="container-fluid">
+                        <input id="notin_cbox" type="checkbox" value="">(Not in)
+                        <input id="search_field" type="text" class="form-control" placeholder="Search">
+                        <button class="btn btn-default" type="button" onclick="javascript:filter_news();"><i class="fa fa-search"></i> </div>
+                    
+                  </form>
+                </div>
+              </div>
+            </nav>
+        </div>
+        <!-- /.panel-body -->
+    </div>
+</div>
+<div id="news_div" class="row">
+    <div class="col-lg-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <i class="fa fa-bell fa-fw"></i> Todas las noticias
+            </div>
+            <!-- /.panel-heading -->
+            <div id="allnews_div" class="panel-body">
+                
+            </div>
+            <!-- /.panel-body -->
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <i class="fa fa-bell fa-fw"></i> Filtro con RegExp
+            </div>
+            <!-- /.panel-heading -->
+            <div id="regexp_div" class="panel-body">
+                
+            </div>
+            <!-- /.panel-body -->
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <i class="fa fa-bell fa-fw"></i> Filtro con XQuery
+            </div>
+            <!-- /.panel-heading -->
+            <div id="xquery_div" class="panel-body">
+                
+            </div>
+            <!-- /.panel-body -->
+        </div>
+    </div>
+</div>

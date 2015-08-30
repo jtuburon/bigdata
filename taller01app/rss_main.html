@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col-lg-12">
-        <h1 class="page-header">Directorio de Profesores</h1>
+        <h1 class="page-header">Consultas al RSS</h1>
     </div>
 </div>
 
@@ -8,7 +8,7 @@
 <div id="departments" class="row">
     <div class="panel panel-default">
         <div class="panel-heading">
-            <i class="fa fa-bell fa-fw"></i> Listado de Unidades Academicas
+            <i class="fa fa-bell fa-fw"></i>Filtrado de noticias
         </div>
         <!-- /.panel-heading -->
         <div class="panel-body">
@@ -34,12 +34,3 @@
 <div id="teachers_div" class="row">
     {% include "taller01app/teachers_list.html" %}
 </div>
-{% if departments_list|length == 0 %}
-<div id="myModal" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
-  <div class="modal-dialog modal-sm">
-    <div class="modal-content">
-      No se encontraron unidades académicas.      
-    </div>
-  </div>
-</div>
-{% endif %}

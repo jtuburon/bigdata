@@ -1,0 +1,42 @@
+<!--
+<div class="list-group">
+    {% for n in news_list %}
+    <div>
+    <a href="#" class="list-group-item">
+        <i class="fa fa-comment fa-fw"></i>{{n.title}}        
+        {% if info == 'all' %}
+        <br>
+        <spam class="pull-right small">{{n.pubdate}}</spam>
+    
+        {% endif %}
+    </a>
+    </div>
+    {% endfor %}
+</div>
+-->
+<ul class="chat">
+    {% for n in news_list %}
+    <li class="left clearfix">
+        <span class="chat-img pull-left">
+            <img src="http://placehold.it/50/55C1E7/fff" alt="User Avatar" class="img-circle">
+        </span>
+        <div class="chat-body clearfix">
+            {% if info == 'all' %}
+                <div class="header">                
+                    <small class="text-muted">
+                        <i class="fa fa-clock-o fa-fw"></i>{{n.pubdate}}
+                    </small>
+                </div>
+                <p>
+                    <a href="{{n.link}}">{{n.title}}</a>
+                </p>
+            {% else %}                
+                <p>
+                    {{n.title}}
+                </p>
+            {% endif %}
+            
+        </div>
+    </li>
+    {% endfor %}
+</ul>

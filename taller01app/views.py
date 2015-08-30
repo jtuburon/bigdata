@@ -18,7 +18,7 @@ from news_retriever import NewsRetriever
 import re, mechanize
 import HTMLParser
 import requests
-
+import codecs
 # Create your views here.
 
 class JSONResponse(HttpResponse):
@@ -32,15 +32,16 @@ class JSONResponse(HttpResponse):
 
 
 def index(request):
-	departments=get_departments()
-	context = {'departments_list': departments}
+	#departments=get_departments()
+	#context = {'departments_list': departments}
+	context= {}
 	return render(request, 'taller01app/index.html', context)
 
 
-import codecs
+
 @csrf_exempt
 @api_view(['GET', 'POST'])
-def show_teachers(request):
+def show_teachers_list(request):
 	if request.method == 'POST':
 		json= request.data['department']
 		json= json.encode('utf-8')
@@ -55,18 +56,27 @@ def show_teachers(request):
 		else: 
 			return HttpResponse('Hellllooooo')
 
+def show_teachers_main(request):
+	departments=get_departments()
+	context = {'departments_list': departments}
+	return render(request, 'taller01app/teachers_main.html', context)
 
 def get_departments():
 	departaments_url = 'http://www.uniandes.edu.co/institucional/facultades/listado-de-departamentos'
-	br = mechanize.Browser()
-	br.open(departaments_url)
-	root = html.fromstring(br.response().read())
-	depts = root.xpath('//table[@class="contentpaneopen"][2]//ul/li/a')
 	departments=[]
-	for dept in depts:
-		d = Department(name=dept.text, url=dept.get("href"))
-		departments.append(d)
+	try:
+		br = mechanize.Browser()
+		br.open(departaments_url)
+		root = html.fromstring(br.response().read())
+		depts = root.xpath('//table[@class="contentpaneopen"][2]//ul/li/a')
+		
+		for dept in depts:
+			d = Department(name=dept.text, url=dept.get("href"))
+			departments.append(d)
+	except HTTPError:
+		print "Site Not Available"
 	return departments
+
 
 """
 List all departments
@@ -406,6 +416,11 @@ def get_teachers(department):
 					teachers.append(t)
 	return teachers
 
+def show_news_main(request):
+	context = {}
+	return render(request, 'taller01app/news_main.html', context)
+
+
 def list_all_news(request):
 	news = NewsRetriever().get_all_news()
 	serializer = NewSerializer(news, many=True)
@@ -417,7 +432,25 @@ def find_news(request):
 	if request.method == 'POST':
 		method= request.data['method']
 		search_text= request.data['search_text']
+		not_in= request.data['not_in']
 		news = NewsRetriever().find_news(method, search_text)
 		serializer = NewSerializer(news, many=True)
 		return JSONResponse(serializer.data)
 
+@csrf_exempt
+@api_view(['GET', 'POST'])
+def show_filtered_news(request):
+	if request.method == 'POST':
+		method= request.data['method']
+		search_text= request.data['search_text']
+		not_in= request.data['not_in']
+		info = 'all' if method =='xquery' else 'title'
+
+		news = NewsRetriever().find_news(method, search_text)
+		context = {'news_list': news, 'info': info }
+		return render(request, 'taller01app/news_list.html', context)
+
+def show_all_news(request):
+	news = NewsRetriever().get_all_news()
+	context = {'news_list': news, 'info': 'title' }
+	return render(request, 'taller01app/news_list.html', context)

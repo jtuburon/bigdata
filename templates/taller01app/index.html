@@ -51,17 +51,19 @@
             <div class="navbar-default sidebar" role="navigation">
                 <div class="sidebar-nav navbar-collapse">
                     <ul class="nav" id="side-menu">
+                        
+                        <li>
+                            <a href="#"><i class="fa fa-edit fa-fw"></i> Info del Equipo</a>
+                        </li>
                         <li class="sidebar-search">
                         </li>
                         <li>
-                            <a href="#"><i class="fa fa-dashboard fa-fw"></i>Directorio de Profesores</a>
+                            <a href="javascript:teachers_index();"><i class="fa fa-dashboard fa-fw"></i>Directorio de Profesores</a>
                         </li>
                         <li>
-                            <a href="#"><i class="fa fa-table fa-fw"></i>Consulta de RSS</a>
+                            <a href="javascript:news_index();"><i class="fa fa-table fa-fw"></i>Consulta de RSS</a>
                         </li>
-                        <li>
-                            <a href="#"><i class="fa fa-edit fa-fw"></i> Integrantes</a>
-                        </li>
+
                     </ul>
                 </div>
                 <!-- /.sidebar-collapse -->
@@ -70,7 +72,7 @@
         </nav>
 
         <div id="page-wrapper">
-            {% include "taller01app/teachers_main.html" %}
+            
         </div>
         <!-- /#page-wrapper -->
 
