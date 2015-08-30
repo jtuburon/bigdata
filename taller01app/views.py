@@ -8,14 +8,16 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 
 from rest_framework.parsers import JSONParser
-from serializers import DepartmentSerializer, TeacherSerializer
+from serializers import DepartmentSerializer, TeacherSerializer, NewSerializer
 from models import Department, Teacher
 
 from django.shortcuts import render
-
 from lxml import html, etree
+from news_retriever import NewsRetriever
+
 import re, mechanize
 import HTMLParser
+import requests
 
 # Create your views here.
 
@@ -403,3 +405,19 @@ def get_teachers(department):
 					t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension, webpage=webpage)
 					teachers.append(t)
 	return teachers
+
+def list_all_news(request):
+	news = NewsRetriever().get_all_news()
+	serializer = NewSerializer(news, many=True)
+	return JSONResponse(serializer.data)
+
+@csrf_exempt
+@api_view(['GET', 'POST'])
+def find_news(request):
+	if request.method == 'POST':
+		method= request.data['method']
+		search_text= request.data['search_text']
+		news = NewsRetriever().find_news(method, search_text)
+		serializer = NewSerializer(news, many=True)
+		return JSONResponse(serializer.data)
+

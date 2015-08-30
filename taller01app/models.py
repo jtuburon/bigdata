@@ -21,3 +21,11 @@ class Teacher(models.Model):
 
     class Meta:        
         managed = False
+
+class New(models.Model):
+    title = models.CharField(max_length=100, blank=True, default='')
+    pubdate = models.CharField(max_length=100, blank=True, default='')
+    link = models.CharField(max_length=150, blank=True, default='')
+    
+    class Meta:        
+        managed = False
