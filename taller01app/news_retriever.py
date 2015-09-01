@@ -67,20 +67,12 @@ class NewsRetriever():
 				reload(sys)  
 				sys.setdefaultencoding('utf8')		
 				h = HTMLParser.HTMLParser()
-				rss2= h.unescape(rss)
-				
-				print rss2						
-				#pattern = r'<item>(.*?)<title>((.*)'+  search_text+ '(.*))</title>(.*?)</item>'				
+				rss= h.unescape(rss)
+					
 				pattern = ur'<item>(.*?)</item>'				
 				regex = re.compile(pattern, re.DOTALL + re.UNICODE + re.IGNORECASE)
-				for match in regex.finditer(rss2):													
+				for match in regex.finditer(rss):													
 					item= match.group(1)	
-					print """
-
-					--->>>>>>>
-
-					"""
-					print item
 					pattern = ur'<title>((.*?)'+ search_text+'(.*?))</title>'				
 					regex = re.compile(pattern, re.UNICODE + re.UNICODE + re.IGNORECASE)
 					matching= regex.search(item)
