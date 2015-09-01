@@ -445,12 +445,17 @@ def show_filtered_news(request):
 		search_text= request.data['search_text']
 		not_in= request.data['not_in']
 		info = 'all' if method =='xquery' else 'title'
+		header =''
+		if method=='xquery':
+			header="Filtrado con XQuery"
+		elif method=='regexp':
+			header="Filtrado con RegExp"
 
 		news = NewsRetriever().find_news(method, search_text)
-		context = {'news_list': news, 'info': info }
+		context = {'news_list': news, 'info': info, 'header': header}
 		return render(request, 'taller01app/news_list.html', context)
 
 def show_all_news(request):
 	news = NewsRetriever().get_all_news()
-	context = {'news_list': news, 'info': 'title' }
+	context = {'news_list': news, 'info': 'title', 'header':'Todas las noticias' }
 	return render(request, 'taller01app/news_list.html', context)

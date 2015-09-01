@@ -22,13 +22,16 @@ function teachers_index(){
     $('#page-wrapper').load('teachers/main', function() {
         if($('#myModal')){
             $('#myModal').modal('show')
-        }
-        
+        }        
     });
 }
 
 function news_index(){
-    $('#page-wrapper').load('news/main')
+    $('#page-wrapper').load('news/main', function(){
+        if($('#allnews_div')){
+            show_all_news();
+        }
+    });
 }
 
 
