@@ -74,7 +74,7 @@ class NewsRetriever():
 				for match in regex.finditer(rss):													
 					item= match.group(1)	
 					pattern = ur'<title>((.*?)'+ search_text+'(.*?))</title>'				
-					regex = re.compile(pattern, re.UNICODE + re.UNICODE + re.IGNORECASE)
+					regex = re.compile(pattern, re.DOTALL + re.UNICODE + re.IGNORECASE)
 					matching= regex.search(item)
 					if matching:
 						title= matching.group(1)
