@@ -5,6 +5,7 @@ function view_teachers(name, url){
 
 	$.ajax({
         url: "teachers/list",
+        timeout: 1000* 60 * 10, 
         data: {
             department: json
         },

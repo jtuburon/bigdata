@@ -129,6 +129,8 @@ def decodeEmail(node):
 		temp= node.text.split('var ')[3].split('document')[0]
 	elif(len(vars_l)==5):
 		temp= node.text.split('var ')[3]
+	elif(len(vars_l)==6):
+		temp= node.text.split('var ')[5]
 		
 	if(temp != None):
 		lines= temp.split('\n') 
@@ -138,19 +140,33 @@ def decodeEmail(node):
 		line1= line1.split(' + ', 1)[1]
 		temp = line0 + ' + ' +line1		
 		temp= eval(temp)
-
-		print "LINDAAA"
+		
 		h = HTMLParser.HTMLParser()
 		mail= h.unescape(temp)
-		print "LINDA: " + mail
 		return mail
 	else:
-		return "LLLLLL"
+		return ""
 
 
 def get_teachers(department):
+	patternG00= ["Civil"]
+	patternG01= ["Matem"]
+	patternG02= ["Mec"]
+	patternG03= ["Ciencias Bio"]
+	patternG04= ["Arte"]
+	patternG05= ["Arquitectura", "Dise" ]
+	patternG06= ["Ceper"]
+	patternG07= ["Musica"]
+
 	d= department
+	print "Esta es la url: "+ d.url
+	if patternG05[0	] in d.name:
+		d.url= d.url.split('/scripts/')[0]
+		print "Esta es la nueva url: "+ d.url
+
 	br = mechanize.Browser()
+
+
 	br.open(d.url)
 	teachers_links = list(br.links(url_regex = "profesores" )) + list(br.links(text_regex = "profesores" ));	
 	unique_teachers_url={}
@@ -158,16 +174,42 @@ def get_teachers(department):
 		if link.url not in unique_teachers_url and link.url :
 			unique_teachers_url[link.url]= link
 	teachers_links= unique_teachers_url.keys();
-	teachers=[]
-	patternG00= ["Civil"]
-	patternG01= ["Matem"]
-	patternG02= ["Mec"]
-	patternG03= ["Ciencias Bio"]
-	patternG04= ["Arte"]
+
+	print teachers_links
+
+	teachers=[]	
 
 	for link in teachers_links:
+		if patternG06[0] in d.name:
+			print "CEPER"
+			br.follow_link(unique_teachers_url[link]);			
+			root = html.fromstring(br.response().read())
+			teachers_urls = root.xpath("//a[@class='contentpagetitle_galeria']");
+			print teachers_urls
+			for u in teachers_urls:
+				try:
+					u.get("href")
+					r = requests.get('http://ceper.uniandes.edu.co'+ u.get("href"))
+					#print r.content;
+					root = html.fromstring(r.content)
+					name=""
+					email=""
+					rangekind=""
+					extension=""
+
+					name = root.xpath("//a[@class='contentpagetitle_galeria']")[0].text
+					mail_e = root.xpath("//span[@class='botonredes']/script")
+					
+					email= decodeEmail(mail_e[0])
+
+					t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension)
+					teachers.append(t)
+				except Exception:
+					print u
+					print "SITE NOT AVAILABLE"
+			
 		### Pattern URL: (/index.php/profesores)
-		if "/index.php/profesores" in link:
+		elif "/index.php/profesores" in link:
 			print "Pattern01"
 			br.follow_link(unique_teachers_url[link]);
 			root = html.fromstring(br.response().read())
@@ -193,6 +235,7 @@ def get_teachers(department):
 					extension= matching.group(0)
 				t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension)
 				teachers.append(t)
+
 
 		## PATTERN URL 						
 		elif "personal/profesores-de-" in link:
@@ -391,6 +434,7 @@ def get_teachers(department):
 				#	extension= matching.group(0)
 				t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension)
 				teachers.append(t)
+
 		elif patternG04[0] in d.name:
 			print "ARTE"
 			print unique_teachers_url[link];
@@ -414,6 +458,87 @@ def get_teachers(department):
 
 					t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension, webpage=webpage)
 					teachers.append(t)
+
+		elif patternG05[0] in d.name or patternG05[1] in d.name:
+			print "ARQUITECTURA O DISE"
+			print unique_teachers_url[link];
+			br.follow_link(unique_teachers_url[link]);			
+			root = html.fromstring(br.response().read())
+			teachers_ranges = root.xpath("//article/div")
+			for tr_e in teachers_ranges:
+				rk_e = tr_e.xpath("./h2")[0]
+				rangekind=""
+				if len(rk_e.xpath("./a"))>0:
+					rangekind=rk_e.xpath("./a")[0].text
+				else:
+					rangekind=rk_e.text
+				teachers_urls = tr_e.xpath(".//a[@class='fancybox-iframe']/@href")
+				br2 = mechanize.Browser()
+				for u in teachers_urls:
+					print u
+					print "##########################################"
+					try:									
+
+						br2.open(u)							
+						root = html.fromstring(br2.response().read())
+						div_e = root.xpath("//div[@id='right']")[0];
+						name=""
+						email=""
+						
+						extension=""
+						webpage=""
+
+
+						name= div_e.xpath("./h1")[0].text
+						email= div_e.xpath("./p/a")[0].text
+						if not ('@' in email or 'at' in email):
+							email=""
+
+						t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension, webpage=webpage)
+						teachers.append(t)
+					except HTTPError:
+						print "Site Not Available: " + u
+					except Exception:
+						print "Site Not: " + u
+
+	if len(teachers_links)==0 and patternG07[0] in d.name:
+		url_base="http://musica.uniandes.edu.co/index.php?option=content&task=category&sectionid=20&id=129&Itemid=141"
+		print "MUSICA"
+		r = requests.get(url_base)
+		print "MUSICA"
+		root = html.fromstring(r.content)
+		teachers_urls = root.xpath("//li/p/a/@href");
+		for u in  teachers_urls:			
+			r2 = requests.get(u)			
+			root = html.fromstring(r2.content)
+			name=""
+			email=""
+			rangekind=""
+			extension=""
+			webpage=""
+
+			name_e= root.xpath("//div[@class='componentheading']")
+			if len(name_e)>0:
+				name= name_e[0].text
+			else:
+				name_e= root.xpath("//span[@class='pathway']")
+				if len(name_e)>0:
+					dirty_data = etree.tostring( name_e[0])	
+					data= re.split("<|>", dirty_data)		
+					name = data[len(data)-3]
+			rks_e = root.xpath("//p[@align='right']/strong")
+			if rks_e[0].text == None:
+				dirty_data = etree.tostring(rks_e[0])
+				matching =  re.search('align="right"/>(.+)<br/>',dirty_data)
+				if matching is not  None:
+					rangekind= matching.group(1)
+			else:
+				rangekind=rks_e[0].text
+
+			email_e = root.xpath("//a/strong/font[@color='#3399ff']")
+			email=email_e[0].text
+			t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension, webpage=webpage)
+			teachers.append(t)
 	return teachers
 
 def show_news_main(request):
