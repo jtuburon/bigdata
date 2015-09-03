@@ -157,6 +157,8 @@ def get_teachers(department):
 	patternG05= ["Arquitectura", "Dise" ]
 	patternG06= ["Ceper"]
 	patternG07= ["Musica"]
+	patternG08= ["Humanidades"]
+	patternG09= ["ingquimica"]
 
 	d= department
 	print "Esta es la url: "+ d.url
@@ -189,25 +191,52 @@ def get_teachers(department):
 			for u in teachers_urls:
 				try:
 					u.get("href")
-					r = requests.get('http://ceper.uniandes.edu.co'+ u.get("href"))
+					url_be= 'http://ceper.uniandes.edu.co'+ u.get("href")
+					r = requests.get(url_be)
 					#print r.content;
 					root = html.fromstring(r.content)
 					name=""
 					email=""
 					rangekind=""
 					extension=""
+					webpage= url_be
 
 					name = root.xpath("//a[@class='contentpagetitle_galeria']")[0].text
 					mail_e = root.xpath("//span[@class='botonredes']/script")
 					
 					email= decodeEmail(mail_e[0])
 
-					t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension)
+					t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension, webpage= webpage)
 					teachers.append(t)
 				except Exception:
 					print u
 					print "SITE NOT AVAILABLE"
-			
+
+		elif patternG08[0] in d.name:
+			print "Humanidades"
+			br.follow_link(unique_teachers_url[link]);			
+			root = html.fromstring(br.response().read())
+			teachers_divs = root.xpath("//div[contains(@class, 'item column-')]")	
+			for t_div in teachers_divs:
+				name=""
+				email=""
+				rangekind=""
+				extension=""
+				webpage=""
+
+				name_e = t_div.xpath("./h2/a")[0]
+				name = name_e.text
+				webpage= d.url[0:-1]+ name_e.get("href")
+				rangekind_p = t_div.xpath("./p")
+				rangekind = rangekind_p[len(rangekind_p) -1].text
+
+
+				email_sc= t_div.xpath(".//script")[0]
+				email = decodeEmail(email_sc)
+
+				t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension, webpage=webpage)
+				teachers.append(t)
+
 		### Pattern URL: (/index.php/profesores)
 		elif "/index.php/profesores" in link:
 			print "Pattern01"
@@ -478,7 +507,6 @@ def get_teachers(department):
 					print u
 					print "##########################################"
 					try:									
-
 						br2.open(u)							
 						root = html.fromstring(br2.response().read())
 						div_e = root.xpath("//div[@id='right']")[0];
@@ -486,7 +514,7 @@ def get_teachers(department):
 						email=""
 						
 						extension=""
-						webpage=""
+						webpage=u
 
 
 						name= div_e.xpath("./h1")[0].text
@@ -515,7 +543,7 @@ def get_teachers(department):
 			email=""
 			rangekind=""
 			extension=""
-			webpage=""
+			webpage= u
 
 			name_e= root.xpath("//div[@class='componentheading']")
 			if len(name_e)>0:
@@ -539,6 +567,38 @@ def get_teachers(department):
 			email=email_e[0].text
 			t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension, webpage=webpage)
 			teachers.append(t)
+	elif patternG09[0] in d.url:
+		print "INQ QUIMICA"
+		url_base="https://ingquimica.uniandes.edu.co/home/gente"
+		r = requests.get(url_base)
+		root = html.fromstring(r.content)
+		p_e = root.xpath("//div[@class='dt_detail_block']")[0];
+		p_e = p_e.xpath(".//td/p")
+		for ttt in p_e:
+			name=""
+			email=""
+			rangekind=""
+			extension=""
+			webpage= ""
+
+			name_e =ttt[0].xpath(".//a")
+			name_e = name_e[len(name_e) -1]
+			name= name_e.text
+
+			webpage= name_e.get("href")
+
+			dirty_data = etree.tostring(ttt)
+			
+			matching =  re.search('(Profesor(.+?))(<br|</strong>|</span>)',dirty_data)
+			if matching is not  None:
+				rangekind= matching.group(1)
+
+			ssc_e =ttt.xpath(".//script")
+			if len(ssc_e)>0:
+				email = decodeEmail(ssc_e[0])
+			
+			t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension, webpage=webpage)
+			teachers.append(t)	
 	return teachers
 
 def show_news_main(request):
