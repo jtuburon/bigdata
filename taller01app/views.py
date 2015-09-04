@@ -605,6 +605,10 @@ def show_news_main(request):
 	context = {}
 	return render(request, 'taller01app/news_main.html', context)
 
+def show_info(request):
+	context = {}
+	return render(request, 'taller01app/info_main.html', context)
+
 
 def list_all_news(request):
 	news = NewsRetriever().get_all_news()

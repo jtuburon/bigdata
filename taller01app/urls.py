@@ -13,4 +13,6 @@ urlpatterns = [
 	url(r'^news/main$', views.show_news_main),
 	url(r'^news/filter$', views.show_filtered_news),
 	url(r'^news/all$', views.show_all_news),
+
+	url(r'^info/main$', views.show_info),
 ]

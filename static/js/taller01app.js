@@ -35,6 +35,9 @@ function news_index(){
     });
 }
 
+function info_index(){
+    $('#page-wrapper').load('info/main');
+}
 
 
 function run_filter(method, search_text, not_in){
