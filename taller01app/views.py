@@ -617,8 +617,8 @@ def find_news(request):
 	if request.method == 'POST':
 		method= request.data['method']
 		search_text= request.data['search_text']
-		not_in= request.data['not_in']
-		news = NewsRetriever().find_news(method, search_text)
+		not_in= request.data['not_in'] == 'true'
+		news = NewsRetriever().find_news(method, search_text, not_in)
 		serializer = NewSerializer(news, many=True)
 		return JSONResponse(serializer.data)
 
@@ -628,7 +628,7 @@ def show_filtered_news(request):
 	if request.method == 'POST':
 		method= request.data['method']
 		search_text= request.data['search_text']
-		not_in= request.data['not_in']
+		not_in= request.data['not_in'] == 'true'
 		info = 'all' if method =='xquery' else 'title'
 		header =''
 		if method=='xquery':
@@ -636,7 +636,7 @@ def show_filtered_news(request):
 		elif method=='regexp':
 			header="Filtrado con RegExp"
 
-		news = NewsRetriever().find_news(method, search_text)
+		news = NewsRetriever().find_news(method, search_text, not_in)
 		context = {'news_list': news, 'info': info, 'header': header}
 		return render(request, 'taller01app/news_list.html', context)
 
