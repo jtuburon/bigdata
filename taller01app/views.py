@@ -152,7 +152,7 @@ def get_teachers(department):
 	patternG00= ["Civil"]
 	patternG01= ["Matem"]
 	patternG02= ["Mec"]
-	patternG03= ["Ciencias Bio"]
+	patternG03= ["Ciencias Bio", "Electr", "Industr"]
 	patternG04= ["Arte"]
 	patternG05= ["Arquitectura", "Dise" ]
 	patternG06= ["Ceper"]
@@ -249,20 +249,25 @@ def get_teachers(department):
 				email=""
 				rangekind=""
 				extension=""
-				
+				webpage=""
 				n= t_e.xpath('.//b')
 				l= t_e.xpath('.//a')
+				
+
 
 				name= n[0].text
 				email=l[len(l)-1].text.replace("\r","").replace("\n","")
 				
+				webpage = l[0].get("href")
+				if(not "http://" in webpage):
+					webpage=d.url[0:-1] + webpage
 				rangekind=t_e[1][0].text						
 				dirty_data = etree.tostring(t_e[1])						
 				print dirty_data
 				matching =  re.search('(\d{4})',dirty_data)
 				if matching is not  None:
 					extension= matching.group(0)
-				t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension)
+				t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension, webpage = webpage)
 				teachers.append(t)
 
 
@@ -371,15 +376,11 @@ def get_teachers(department):
 				teachers.append(t)
 
 		## PATTERN G01				
-		elif patternG01[0] in d.name:
-			print unique_teachers_url[link];
+		elif patternG01[0] in d.name:			
 			br.follow_link(unique_teachers_url[link]);
-			print link
-			#print br.response().read()
 			root = html.fromstring(br.response().read())
 			iframe_e = root.xpath("//div[@class='contentpane']/iframe")
 			if len(iframe_e)>0:
-				print iframe_e[0].get("src")
 				br.follow_link(url= iframe_e[0].get("src"));
 				root = html.fromstring(br.response().read())
 				teachers_e = root.xpath("//div[@class='tile-parent']")
@@ -393,10 +394,8 @@ def get_teachers(department):
 					webpage=""
 					
 					name= t_e[1][0].text
-					print "%%%%%%%%%%%%%%%%%%%%%%%%%%%"
 					dirty_data = etree.tostring(t_e[2])
-					print dirty_data
-
+			
 					matching =  re.search('<br/><br/>(.+)<br/>',dirty_data)
 					if matching is not  None:
 						rangekind= matching.group(1)
@@ -437,32 +436,58 @@ def get_teachers(department):
 					t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension)
 					teachers.append(t)
 
-		elif patternG03[0] in d.name:
+		elif patternG03[0] in d.name or patternG03[1] in d.name or patternG03[2] in d.name:
 			print unique_teachers_url[link];
 			br.follow_link(unique_teachers_url[link]);
 			root = html.fromstring(br.response().read())
 			iframe_e = root.xpath("//iframe[contains(@src, 'academia.uniandes.edu.co/WebAcademy/showFaculties')]")[0]
-			br.follow_link(url=iframe_e.get("src"));
-			print br.response().read()
-			root = html.fromstring(br.response().read())
-			teachers_e= root.xpath("//tr")
-			for t_e in teachers_e:		
-				name=""
-				email=""
-				rangekind=""
-				extension=""
-				#n= t_e.xpath('.//b')
-				#l= t_e.xpath('.//a')
-				#name= n[0].text
-				#email=l[len(l)-1].text.replace("\r","").replace("\n","")						
-				#rangekind=t_e[1][0].text						
-				#dirty_data = etree.tostring(t_e[1])						
-				#print dirty_data
-				#matching =  re.search('(\d{4})',dirty_data)
-				#if matching is not  None:
-				#	extension= matching.group(0)
-				t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension)
-				teachers.append(t)
+			aca_url=iframe_e.get("src");
+			print aca_url
+
+			from selenium import webdriver
+			from selenium.webdriver.common.by import By
+			from selenium.webdriver.support.ui import WebDriverWait
+			from selenium.webdriver.support import expected_conditions as EC
+			from selenium.common.exceptions import TimeoutException
+
+			#browser = webdriver.Firefox()
+			browser = webdriver.PhantomJS()
+			#browser = webdriver.Remote(desired_capabilities={'browserName': 'htmlunit', 'javascriptEnabled': True, 'platform': 'ANY', 'version': '', 'setThrowExceptionOnScriptError': True})
+			response= browser.get(aca_url)
+			delay = 60 # seconds
+			try:
+				e= WebDriverWait(browser, delay).until(EC.presence_of_element_located((By.ID, "x-auto-6")))
+				print "Page is ready!"
+				teachers_e= e.find_elements_by_xpath("//div[contains(@class, 'x-grid3-col-idInfoFacultyColumn')]")
+				for t_e in teachers_e:
+					name=""
+					email=""
+					rangekind=""
+					extension=""
+					extension=""
+					webpage=""
+
+					inner_html = t_e.get_attribute('innerHTML')
+					matches =  list(re.finditer('</b>(.*?)<br>', inner_html))
+					name= matches[1].group(1) + ' ' +  matches[0].group(1)
+					email= matches[2].group(1)
+
+					matching =  re.search(ur'n: </b>(\d{4}( - \d{4})?)<br>',inner_html)
+					if matching is not  None:
+						extension= matching.group(1)
+
+					matching =  re.search(ur'<b>(Profesor(.*?))</b>',inner_html)
+					if matching is not  None:
+						rangekind= matching.group(1)
+					if rangekind=="":
+						rangekind="Pendiente por asignar"
+					
+					t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension)
+					teachers.append(t)
+
+			except TimeoutException:
+				print "Loading took too much time!"
+			
 
 		elif patternG04[0] in d.name:
 			print "ARTE"
