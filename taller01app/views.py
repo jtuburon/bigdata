@@ -159,6 +159,7 @@ def get_teachers(department):
 	patternG07= ["Musica"]
 	patternG08= ["Humanidades"]
 	patternG09= ["ingquimica"]
+	patternG10= ["quimica"]
 
 	d= department
 	
@@ -606,6 +607,101 @@ def get_teachers(department):
 			email=email_e[0].text
 			t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension, webpage=webpage)
 			teachers.append(t)
+	elif len(teachers_links)==0 and patternG10[0] in d.url:
+		print "QUIMICA"
+		print d.url
+		r = requests.get(d.url)		
+		root = html.fromstring(r.content)
+		sc_e= root.xpath("//script")
+		url_b =sc_e[0].text.split('"')[1];
+		r = requests.get(url_b)
+		root = html.fromstring(r.content)
+		a_es= root.xpath("//span[text()='Profesores']/../following-sibling::div[1]//li/a")
+		print a_es
+		for a_e in a_es:
+			n_url = url_b[0:-1] + a_e.get("href")
+			print n_url
+			r = requests.get(n_url)		
+			root = html.fromstring(r.content)
+			names_e= root.xpath("//tbody/tr/td[2]//strong[contains(text(), ' ')]"
+				+"|//tbody/tr/td[2]//p[contains(text(), ' ')]"
+				+"|//div[@class='item-page']//p/strong[contains(text(), ' ')]"				)
+			for e_e in names_e:
+				name=""
+				email=""
+				rangekind=""
+				extension=""
+				webpage= ""
+				
+				name= e_e.text
+
+				trinfo = e_e.xpath("../../../following-sibling::tr[1]")
+				if len(trinfo)>0:					
+					trinfo= trinfo[0].xpath(".//td/p")
+					if len(trinfo)>0:
+						rangekind= trinfo[0].text
+						
+						email = decodeEmail(trinfo[0].xpath("./following-sibling::p[1]/script")[0])
+
+						dirty_data= trinfo[0].xpath("./following-sibling::p[2]")[0].text
+						matching =  re.search('n: (\d{4})',dirty_data)
+						if matching is not  None:
+							extension= matching.group(1)
+
+						wp_e= trinfo[len(trinfo)-1]
+						webpage=  wp_e[0].get("href");
+						if not "uniandes" in webpage:
+							webpage= url_b+ webpage		
+
+				else:					
+					trinfo = e_e.xpath("../../following-sibling::tr[1]")
+					if len(trinfo)>0:
+						trinfo= trinfo[0].xpath(".//td/p")
+						rangekind= trinfo[0].text	
+
+						sc_e =trinfo[0].xpath("./following-sibling::p[1]/script")
+						if len(sc_e)>0:
+							email = decodeEmail(sc_e[0])
+						else:
+							sc_e =trinfo[0].xpath("./following-sibling::p[2]/script")
+							if len(sc_e)>0:
+								email = decodeEmail(sc_e[0])
+
+						wp_e= trinfo[len(trinfo)-1]
+						webpage=  wp_e[0].get("href");
+						if not "uniandes" in webpage:
+							webpage= url_b+ webpage
+						
+						dirty_data= trinfo[2].text
+						matching =  re.search('n: (\d{4})',dirty_data)
+						if matching is not  None:
+							extension= matching.group(1)
+						else:
+							dirty_data= trinfo[3].text
+							matching =  re.search('n: (\d{4})',dirty_data)
+							if matching is not  None:
+								extension= matching.group(1)
+					else:
+						trinfo = e_e.xpath("../following-sibling::p[2]")
+						if len(trinfo)>0 :
+							rangekind= trinfo[0].text
+							email = decodeEmail(trinfo[0].xpath("./following-sibling::p[1]/script")[0])
+							dirty_data= trinfo[0].xpath("./following-sibling::p[2]")[0].text
+							matching =  re.search('n: (\d{4})',dirty_data)
+							if matching is not  None:
+								extension= matching.group(1)		
+
+
+							wp_e= trinfo[0].xpath("./following-sibling::p[3]")							
+							if len(wp_e)>0:
+								if len(wp_e[0])>0:
+									webpage=  wp_e[0][0].get("href")
+									if not "uniandes" in webpage:
+										webpage= url_b+ webpage				
+				t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension, webpage=webpage)
+				teachers.append(t)
+			
+
 	elif patternG09[0] in d.url:
 		print "INQ QUIMICA"
 		url_base="https://ingquimica.uniandes.edu.co/home/gente"
@@ -637,7 +733,7 @@ def get_teachers(department):
 				email = decodeEmail(ssc_e[0])
 			
 			t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension, webpage=webpage)
-			teachers.append(t)	
+			teachers.append(t)
 	return teachers
 
 def show_news_main(request):
