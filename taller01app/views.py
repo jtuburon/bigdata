@@ -161,11 +161,10 @@ def get_teachers(department):
 	patternG09= ["ingquimica"]
 
 	d= department
-	print "Esta es la url: "+ d.url
+	
 	if patternG05[0	] in d.name:
 		d.url= d.url.split('/scripts/')[0]
-		print "Esta es la nueva url: "+ d.url
-
+	
 	br = mechanize.Browser()
 
 
@@ -418,23 +417,38 @@ def get_teachers(department):
 
 		## PATTERN G02				
 		elif patternG02[0] in d.name:
-			print unique_teachers_url[link];
 			br.follow_link(unique_teachers_url[link]);
 			root = html.fromstring(br.response().read())
+			teachers_urls = root.xpath("//a[text()='+INFO']")
+			for a_e in teachers_urls:	
+				url_e = a_e.get('href');	
+				if "uniandes" in url_e:
+					name=""
+					email=""
+					rangekind=""
+					extension=""
 
-			
-			teachers_e = root.xpath("//article/section/p//*[@style='color: #0073a3;']")
-			for t_e in teachers_e:		
-				name=""
-				email=""
-				rangekind="PROFESOR DE PLANTA"
-				extension=""
+					r = requests.get(url_e)
+					root = html.fromstring(r.content)
+					name_e = root.xpath("//p[@class='nombreProfesor']")
+					if len (name_e)>0:
+						name = name_e[0].text		
+					mail_e = root.xpath("//a[contains(@href, 'mailto:')]")
+					if len (mail_e)>0:
+						email = mail_e[0].get('href').replace('mailto:','')
+					rk_e = root.xpath("//p[@class='infoFacultad']")
+					if len (mail_e)>0:
+						rangekind = rk_e[0].text
 
-				if t_e.text != None:
-					name= t_e.text
-					print name
-					t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension)
-					teachers.append(t)
+					p_e= a_e.xpath("../following-sibling::p[1]")
+					dirty_data = etree.tostring(p_e[0])
+					matching =  re.search('(n: |160;)(\d{4})',dirty_data)
+					if matching is not  None:
+						extension= matching.group(2)
+					
+					if not name=='':
+						t= Teacher(name= name, email=email, rangekind= rangekind, extension=extension, webpage= url_e)
+						teachers.append(t)
 
 		elif patternG03[0] in d.name or patternG03[1] in d.name or patternG03[2] in d.name:
 			print unique_teachers_url[link];
