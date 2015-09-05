@@ -25,7 +25,11 @@
                                 <td>{{t.rangekind}}</td>
                                 <td>{{t.extension}}</td>
                                 <td>{{t.email}}</td>
-                                <td>{{t.webpage}}</td>
+                                <td>
+                                    {% if t.webpage %}
+                                        <a href="{{t.webpage}}" data-toggle="tooltip" title="{{t.webpage}}">Link</a>
+                                    {% endif %}
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>

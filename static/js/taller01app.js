@@ -32,6 +32,15 @@ function news_index(){
         if($('#allnews_div')){
             show_all_news();
         }
+        $('#search_field').bind("enterKey",function(e){
+           filter_news();
+        });
+        $('#search_field').keyup(function(e){
+            if(e.keyCode == 13)
+            {
+                $(this).trigger("enterKey");
+            }
+        });
     });
 }
 
